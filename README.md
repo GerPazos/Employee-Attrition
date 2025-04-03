@@ -1,10 +1,6 @@
 # 💼 Employee Attrition Prediction
 This project aims to predict employee attrition based on various personal and work-related features.
 
-# 💼 Employee Attrition Prediction
-
-Predicting employee attrition using structured HR data and machine learning
-
 ## Table of Contents
 - [Project Description](#project-description)
 - [Key Concepts](#key-concepts)
