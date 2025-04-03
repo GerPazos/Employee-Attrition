@@ -121,3 +121,13 @@ new_data = pd.read_csv('new_employees.csv')
 # Predict
 predictions = pipeline.predict(new_data)
 probas = pipeline.predict_proba(new_data)[:, 1]
+
+To use only the trained model (with preprocessed data):
+model = joblib.load('rf_model_only.pkl')
+probas = model.predict_proba(preprocessed_data)[:, 1]
+
+---
+
+## Conclusion
+
+A machine learning model was built to estimate the probability of employee attrition using historical HR data. The final model is based on a Random Forest classifier, trained with optimized hyperparameters and a reduced set of selected numerical features. It was integrated into a complete pipeline with preprocessing and saved in .pkl format. Both the pipeline and the standalone model can be used to generate attrition predictions on new employee data.
