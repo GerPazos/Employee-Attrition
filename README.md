@@ -1,4 +1,5 @@
 # 💼 Employee Attrition Prediction
+
 This project aims to predict employee attrition based on various personal and work-related features.
 
 ## Table of Contents
@@ -37,7 +38,7 @@ This work was done as part of a data science challenge and includes both explora
 
 ## Dataset Overview
 
-The dataset includes demographic and job-related features:
+The dataset includes demographic and job-related features such as:
 
 - Age, Gender, Education, Department, Job Role, Years at Company, etc.
 - Target variable: `Attrition` (Yes/No)
@@ -48,12 +49,12 @@ Initial preprocessing removed constant or non-informative features such as `Empl
 
 ## EDA and Preprocessing
 
-- Identified variable distributions, outliers, and class balance.
-- No resampling needed (target was nearly balanced).
+- Variable distributions, outliers, and class balance were explored.
+- No resampling was needed (target was nearly balanced).
 - Missing values were handled using:
-  - Median imputation for numerical features.
-  - Mode imputation for ordinal/categorical features.
-- Categorical features were encoded using OneHotEncoding or Label Encoding as appropriate.
+  - Median imputation for skewed numerical features with outliers.
+  - Mode imputation for ordinal features.
+- Categorical features were encoded using Label Encoding (for binary) and One-Hot Encoding (for multi-category).
 
 ---
 
@@ -61,48 +62,55 @@ Initial preprocessing removed constant or non-informative features such as `Empl
 
 ### Baseline Models
 
-- **Logistic Regression** and **XGBoost** were used for benchmarking.
-- Random Forest outperformed other models in recall and F1-score.
+- **Logistic Regression** and **XGBoost** were trained for benchmarking.
+- Random Forest outperformed both in recall and F1-score.
 
 ### Random Forest with Hyperparameter Tuning
 
-- Tuned via `RandomizedSearchCV` with 5-fold cross-validation.
-- Best parameters: `n_estimators=200`, `max_features='log2'`, etc.
+- Hyperparameters were optimized using `RandomizedSearchCV` with 5-fold cross-validation.
+- Best configuration included `n_estimators=200`, `max_features='log2'`, `min_samples_split=5`, etc.
 
 ---
 
 ## Feature Selection
 
-- Feature importance was computed from the trained Random Forest.
+- Feature importances were extracted from the trained Random Forest model.
 - Only numerical features with importance > 0.01 were retained.
-- 19 key features were selected for the final pipeline.
+- A total of 19 features were selected for the final model.
 
 ---
 
 ## Final Pipeline
 
-- A complete `Pipeline` was built using scikit-learn:
-  - Median imputation for numerical features.
-  - Random Forest classifier (already trained and tuned).
-- Pipeline was trained on the full dataset.
-- Saved to `rf_pipeline_selected_features.pkl`
+- A complete scikit-learn `Pipeline` was created with:
+  - Median imputation for selected numerical features.
+  - Tuned Random Forest classifier.
+- The pipeline was trained on the full dataset and saved as:
 
-The standalone model (without preprocessing steps) was also saved as `rf_model_only.pkl`.
+```
+rf_pipeline_selected_features.pkl
+```
+
+- The standalone trained model (without preprocessing) was also saved as:
+
+```
+rf_model_only.pkl
+```
 
 ---
 
 ## Evaluation Metrics
 
-- **Recall**: Prioritized to detect true attrition cases.
-- **F1 Score**: Balance between precision and recall.
-- **ROC AUC**: 0.994
-- **Confusion Matrix** and classification report included in the notebook.
+- **Recall**: prioritized to detect employees at risk of leaving.
+- **F1 Score**: chosen to balance recall and precision.
+- **ROC AUC**: 0.994, indicating excellent class separability.
+- Additional outputs: classification report, confusion matrix, and ROC curve.
 
 ---
 
 ## Usage Guide
 
-To use the pipeline for new predictions:
+To use the pipeline for making predictions:
 
 ```python
 import joblib
@@ -111,19 +119,34 @@ import pandas as pd
 # Load pipeline
 pipeline = joblib.load('rf_pipeline_selected_features.pkl')
 
-# Load new employee data
-new_data = pd.read_csv('new_employees.csv')
+# Load new employee data (in this case, the same data used for training is reused for demonstration)
+new_employees = pd.read_pickle('attrition_dataset.pkl')
 
 # Predict
-predictions = pipeline.predict(new_data)
-probas = pipeline.predict_proba(new_data)[:, 1]
+predictions = pipeline.predict(new_employees)
+probas = pipeline.predict_proba(new_employees)[:, 1]
 
-To use only the trained model (with preprocessed data):
+# Save results
+results = new_employees.copy()
+results['Attrition_Prediction'] = predictions
+results['Attrition_Probability'] = probas
+results.to_csv('attrition_predictions.csv', index=False)
+```
+
+To use the trained model only (with data already preprocessed):
+
+```python
 model = joblib.load('rf_model_only.pkl')
 probas = model.predict_proba(preprocessed_data)[:, 1]
+```
 
 ---
 
-## Conclusion
+## Conclusion and Run Instructions
 
-A machine learning model was built to estimate the probability of employee attrition using historical HR data. The final model is based on a Random Forest classifier, trained with optimized hyperparameters and a reduced set of selected numerical features. It was integrated into a complete pipeline with preprocessing and saved in .pkl format. Both the pipeline and the standalone model can be used to generate attrition predictions on new employee data.
+A machine learning model was developed to estimate the probability of employee attrition using historical HR data. The final solution is based on a Random Forest classifier trained with optimized hyperparameters and a selected set of numerical features. The model was embedded into a pipeline and saved in `.pkl` format for future use.
+
+To reproduce the results:
+- Clone this repository
+- Run the notebook from start to finish (`.ipynb`)
+- Replace the demo employee dataset with your own for prediction
